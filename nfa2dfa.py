@@ -6,7 +6,7 @@ rules = [ # Proper hardcode
 	'B-b-C',
 	'C-a-C',
 	'A-a-A',
-	'B-a-A'
+	'B-a-C'
 ]
 
 def getNFA(rules):
@@ -49,18 +49,23 @@ def getMethods(nfa):
 	return methods
 
 def convertNFA2DFA(nfa, states, methods):
-	dfa = nfa
+	dfa = nfa.copy()
 	for s in states:
 		if not s in dfa:
 			separated = list(s)
 			for m in methods:
 				temp = []
+
 				for sp in separated:
 					if m in dfa[sp]:
 						temp.append(dfa[sp][m])
+
 				if not s in dfa:
 					dfa[s] = {}
-				dfa[s][m] = max(temp, key=len)
+						
+				dfa[s][m] = ''.join(set(''.join(temp)))
+				states.append(''.join(set(''.join(temp))))
+
 	return dfa
 
 nfa = getNFA(rules)
@@ -71,10 +76,3 @@ dfa = convertNFA2DFA(nfa, states, methods)
 df = pd.DataFrame(dfa)
 df = df.fillna("-")
 print(df.transpose())
-
-
-
-
-
-# nfa_table = pd.DataFrame(formatted)
-# print(nfa_table.transpose())
