@@ -6,7 +6,7 @@ rules = [ # Proper hardcode
 	'B-b-C',
 	'C-a-C',
 	'A-a-A',
-	'B-a-C'
+	'B-a-A '
 ]
 
 def getNFA(rules):
