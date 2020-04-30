@@ -28,7 +28,7 @@ def readRules(inputArr, separator='->'):
 
 	return res
 
-def _detectEpsilon(rules):
+def _haveEpsilon(rules):
 	for key in rules:
 		for el in rules[key]:
 			if el == EPS:
@@ -37,7 +37,7 @@ def _detectEpsilon(rules):
 	return False, None
 
 def removeEpsilon(rules):
-	haveEpsilon, epsKey = _detectEpsilon(rules)
+	haveEpsilon, epsKey = _haveEpsilon(rules)
 
 	while haveEpsilon:
 		rules[epsKey].remove(EPS)
@@ -61,7 +61,7 @@ def removeEpsilon(rules):
 						else:
 							rules[key][i] = woEps
 			
-		haveEpsilon, epsKey = _detectEpsilon(rules)
+		haveEpsilon, epsKey = _haveEpsilon(rules)
 	
 	return rules
 
