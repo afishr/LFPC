@@ -5,14 +5,40 @@ INPUT_FILES = [
 	'cnf_input_1.txt',
 	'cnf_input_2.txt'
 ]
-INPUT = open(INPUT_FILES[1], 'r').read().split('\n')
+INPUT = open(INPUT_FILES[0], 'r').read().split('\n')
 EPS = '_'
 
-def printRules(rules):
+def _printRules(rules):
 	for key in rules:
 		print(key, ' -> ', rules[key])
 	print('-------------------------')
   
+def _haveEpsilon(rules):
+	for key in rules:
+		for el in rules[key]:
+			if el == EPS:
+				return True, key
+	
+	return False, None
+
+def _haveRenaming(key, rules):
+	for el in rules[key]:
+		if ( len(el) == 1 ) and (el in rules):
+			return True, el
+
+	return False, None
+
+def _removeRenaming(key, initialValue, rules):
+	haveRenaming, value = _haveRenaming(initialValue, rules)
+
+	if haveRenaming:
+		rules = _removeRenaming(initialValue, value, rules)
+	
+	rules[key].remove(initialValue)
+	rules[key] = rules[key] + rules[initialValue]
+
+	return rules	
+
 def readRules(inputArr, separator='->'):
 	res = {}
 	for el in inputArr:
@@ -24,14 +50,6 @@ def readRules(inputArr, separator='->'):
 		res[x[0]].append(x[1])
 
 	return res
-
-def _haveEpsilon(rules):
-	for key in rules:
-		for el in rules[key]:
-			if el == EPS:
-				return True, key
-	
-	return False, None
 
 def removeEpsilon(rules):
 	haveEpsilon, epsKey = _haveEpsilon(rules)
@@ -62,24 +80,6 @@ def removeEpsilon(rules):
 	
 	return rules
 
-def _haveRenaming(key, rules):
-	for el in rules[key]:
-		if ( len(el) == 1 ) and (el in rules):
-			return True, el
-
-	return False, None
-
-def _removeRenaming(key, initialValue, rules):
-	haveRenaming, value = _haveRenaming(initialValue, rules)
-
-	if haveRenaming:
-		rules = _removeRenaming(initialValue, value, rules)
-	
-	rules[key].remove(initialValue)
-	rules[key] = rules[key] + rules[initialValue]
-
-	return rules	
-
 def removeRenamings(rules):
 	for key in rules:
 		haveRenaming, val = _haveRenaming(key, rules)
@@ -89,8 +89,8 @@ def removeRenamings(rules):
 	return rules
 
 
-
 rules = readRules(INPUT)
 
 rules = removeEpsilon(rules)
 rules = removeRenamings(rules)
+_printRules(rules)

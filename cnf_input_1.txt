@@ -7,4 +7,4 @@ B->aC
 B->aS
 B->AC
 C->_
-E->A
+E->AS
