@@ -1,3 +1,5 @@
+import copy
+
 # TERMINAL = ['S', 'A', 'B', 'C', 'E']
 # NONTERMINAL = ['a', 'd']
 
@@ -10,7 +12,7 @@ EPS = '_'
 
 def _printRules(rules):
 	for key in rules:
-		print(key, ' -> ', rules[key])
+		print(key, '->', rules[key])
 	print('-------------------------')
   
 def _haveEpsilon(rules):
@@ -52,7 +54,7 @@ def readRules(inputArr, separator='->'):
 	return res
 
 def removeEpsilon(rules):
-	localRules = rules.copy()
+	localRules = copy.deepcopy(rules)
 
 	haveEpsilon, epsKey = _haveEpsilon(localRules)
 
@@ -82,7 +84,7 @@ def removeEpsilon(rules):
 	return localRules
 
 def removeRenamings(rules):
-	localRules = rules.copy()
+	localRules = copy.deepcopy(rules)
 	for key in localRules:
 		haveRenaming, val = _haveRenaming(key, localRules)
 		if haveRenaming:
@@ -91,7 +93,7 @@ def removeRenamings(rules):
 	return localRules
 
 def removeInaccessibles(rules):
-	localRules = rules.copy()
+	localRules = copy.deepcopy(rules)
 	accessedKeys = set()
 
 	for key in localRules:
@@ -106,12 +108,49 @@ def removeInaccessibles(rules):
 
 	return localRules
 
+def removeNonproductives(rules):
+	localRules = copy.deepcopy(rules)
+
+	productives = set()
+
+	for key in localRules:
+		for el in localRules[key]:
+			if ( len(el) == 1 ) and (el not in localRules):
+				productives.add(key)
+
+	counter = 1
+	while counter:
+		for key in localRules:
+			if key in productives:
+				continue
+
+			for el in localRules[key]:
+				for letter in el:
+					if (letter in productives):
+						productives.add(key)
+						counter += 1
+		
+		counter -= 1
+
+	for key in list(localRules):
+		if key not in productives:
+			del localRules[key]
+
+			for innerKey in list(localRules):
+				for el in localRules[innerKey]:
+					if key in el:
+						localRules[innerKey].remove(el)
+
+	return localRules
+	
+
 rules = readRules(INPUT)
 
-_printRules(rules)
+# _printRules(rules)
 
 rules = removeEpsilon(rules)
 rules = removeRenamings(rules)
 rules = removeInaccessibles(rules)
-
+rules = removeNonproductives(rules)
 _printRules(rules)
+
