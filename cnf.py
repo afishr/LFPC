@@ -52,45 +52,66 @@ def readRules(inputArr, separator='->'):
 	return res
 
 def removeEpsilon(rules):
-	haveEpsilon, epsKey = _haveEpsilon(rules)
+	localRules = rules.copy()
+
+	haveEpsilon, epsKey = _haveEpsilon(localRules)
 
 	while haveEpsilon:
-		rules[epsKey].remove(EPS)
-		if len(rules[epsKey]) == 0:
-			del rules[epsKey]
+		localRules[epsKey].remove(EPS)
+		if len(localRules[epsKey]) == 0:
+			del localRules[epsKey]
 
-		for key in rules:
+		for key in localRules:
 			if key == epsKey:
 				continue
 			
-			for i, el in enumerate(rules[key]):
+			for i, el in enumerate(localRules[key]):
 				if epsKey in el:
 					woEps = el.replace(epsKey, '')
 
-					if epsKey in rules:
+					if epsKey in localRules:
 						if woEps:
-							rules[key].append(woEps)
+							localRules[key].append(woEps)
 					else:
-						if len(rules[key][i]) == 1:
-							rules[key].remove(epsKey)
+						if len(localRules[key][i]) == 1:
+							localRules[key].remove(epsKey)
 						else:
-							rules[key][i] = woEps
+							localRules[key][i] = woEps
 			
-		haveEpsilon, epsKey = _haveEpsilon(rules)
-	
-	return rules
+		haveEpsilon, epsKey = _haveEpsilon(localRules)
+	return localRules
 
 def removeRenamings(rules):
-	for key in rules:
-		haveRenaming, val = _haveRenaming(key, rules)
+	localRules = rules.copy()
+	for key in localRules:
+		haveRenaming, val = _haveRenaming(key, localRules)
 		if haveRenaming:
-			rules = _removeRenaming(key, val, rules)
+			localRules = _removeRenaming(key, val, localRules)
 	
-	return rules
+	return localRules
 
+def removeInaccessibles(rules):
+	localRules = rules.copy()
+	accessedKeys = set()
+
+	for key in localRules:
+		for el in localRules[key]:
+			for letter in el:
+				if (letter in localRules):
+					accessedKeys.add(letter)
+
+	for key in list(localRules):
+		if key not in accessedKeys:
+			del localRules[key]
+
+	return localRules
 
 rules = readRules(INPUT)
 
+_printRules(rules)
+
 rules = removeEpsilon(rules)
 rules = removeRenamings(rules)
+rules = removeInaccessibles(rules)
+
 _printRules(rules)
