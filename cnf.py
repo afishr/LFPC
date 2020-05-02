@@ -65,8 +65,38 @@ def removeEpsilon(rules):
 	
 	return rules
 
+def _haveRenaming(key, rules):
+	for el in rules[key]:
+		if ( len(el) == 1 ) and (el in rules):
+			return True, el
+
+	return False, None
+
+def _removeRenaming(key, initialValue, rules):
+	haveRenaming, value = _haveRenaming(initialValue, rules)
+
+	if haveRenaming:
+		_removeRenaming(initialValue, value, rules)
+	
+	rules[key].remove(initialValue)
+
+	rules[key] = rules[key] + rules[initialValue]
+
+	print(rules)
+	
+
+def removeRenamings(rules):
+	for key in rules:
+		haveRenaming, val = _haveRenaming(key, rules)
+		if haveRenaming:
+			_removeRenaming(key, val, rules)
+
 
 
 rules = readRules(INPUT)
-rules = removeEpsilon(rules)
 print(rules)
+
+rules = removeEpsilon(rules)
+
+removeRenamings(rules)
+# print(rules)
