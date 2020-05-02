@@ -1,0 +1,10 @@
+S->dB
+S->A
+A->d
+A->dS
+A->aAdAB
+B->aC
+B->aS
+B->AC
+C->_
+E->A

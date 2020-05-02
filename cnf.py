@@ -1,20 +1,17 @@
-TERMINAL = ['S', 'A', 'B', 'C', 'E']
-NONTERMINAL = ['a', 'd']
+# TERMINAL = ['S', 'A', 'B', 'C', 'E']
+# NONTERMINAL = ['a', 'd']
 
-INPUT = [
-	'S->dB',
-	'S->A',
-	'A->d',
-	'A->dS',
-	'A->aAdAB',
-	'B->aC',
-	'B->aS',
-	'B->AC',
-	'C->_',
-	'E->AS'
+INPUT_FILES = [
+	'cnf_input_1.txt',
+	'cnf_input_2.txt'
 ]
-
+INPUT = open(INPUT_FILES[1], 'r').read().split('\n')
 EPS = '_'
+
+def printRules(rules):
+	for key in rules:
+		print(key, ' -> ', rules[key])
+	print('-------------------------')
   
 def readRules(inputArr, separator='->'):
 	res = {}
@@ -76,27 +73,24 @@ def _removeRenaming(key, initialValue, rules):
 	haveRenaming, value = _haveRenaming(initialValue, rules)
 
 	if haveRenaming:
-		_removeRenaming(initialValue, value, rules)
+		rules = _removeRenaming(initialValue, value, rules)
 	
 	rules[key].remove(initialValue)
-
 	rules[key] = rules[key] + rules[initialValue]
 
-	print(rules)
-	
+	return rules	
 
 def removeRenamings(rules):
 	for key in rules:
 		haveRenaming, val = _haveRenaming(key, rules)
 		if haveRenaming:
-			_removeRenaming(key, val, rules)
+			rules = _removeRenaming(key, val, rules)
+	
+	return rules
 
 
 
 rules = readRules(INPUT)
-print(rules)
 
 rules = removeEpsilon(rules)
-
-removeRenamings(rules)
-# print(rules)
+rules = removeRenamings(rules)
