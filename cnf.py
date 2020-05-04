@@ -8,7 +8,7 @@ INPUT_FILES = [
 	'cnf_input_1.txt',
 	'cnf_input_2.txt'
 ]
-INPUT = open(INPUT_FILES[0], 'r').read().split('\n')
+INPUT = open(INPUT_FILES[1], 'r').read().split('\n')
 EPS = '_'
 
 def _printRules(rules):
@@ -53,6 +53,16 @@ def _containsNonterminal(str, rules):
 		if letter in rules:
 			return True
 	return False
+
+def _generateSymbol(pos, rules):
+	#FIXME: Function can't handle situation when all letters in alphabet are used
+
+	letters = string.ascii_uppercase
+
+	while letters[pos] in rules:
+		pos -= 1
+	
+	return letters[pos], pos
 
 def readRules(inputArr, separator='->'):
 	res = {}
@@ -160,11 +170,8 @@ def normalize(rules):
 	localRules = copy.deepcopy(rules)
 
 	cache = {}
-	letters = string.ascii_uppercase
 	terminals = string.ascii_lowercase
-	lettersCounter = len(letters) - 1
-
-	#FIXME: When new letter nonterminal symbol need to check if this letter already exists in rules
+	lettersCounter = len(string.ascii_uppercase) - 1
 
 	callStack = 1
 	while callStack:
@@ -174,12 +181,12 @@ def normalize(rules):
 					if el in cache:
 						localRules[key][i] = cache[el]
 					else:
-						cache[el] = letters[lettersCounter] + el[len(el)-1]
+						symbol, lettersCounter = _generateSymbol(lettersCounter, localRules)
+						cache[el] = symbol + el[len(el)-1]
 
-						localRules[ letters[lettersCounter] ] = [el[:len(el)-1]]
+						localRules[symbol] = [el[:len(el)-1]]
 						localRules[key][i] = cache[el]
 
-						lettersCounter -= 1
 						callStack += 1
 	
 		callStack -= 1
@@ -195,10 +202,10 @@ def normalize(rules):
 							if letter in cache:
 								localRules[key][i] = localRules[key][i].replace(letter, cache[letter])
 							else:
-								cache[letter] = letters[lettersCounter]
+								symbol, lettersCounter = _generateSymbol(lettersCounter, localRules)
+								cache[letter] = symbol
 								localRules[ cache[letter] ] = [letter]
 								localRules[key][i] = localRules[key][i].replace(letter, cache[letter])
-								lettersCounter -= 1
 					cache[el] = localRules[key][i]
 
 	return localRules					
