@@ -1,9 +1,6 @@
 import copy
 import string
 
-# TERMINAL = ['S', 'A', 'B', 'C', 'E']
-# NONTERMINAL = ['a', 'd']
-
 INPUT_FILES = [
 	'cnf_input_1.txt',
 	'cnf_input_2.txt'
