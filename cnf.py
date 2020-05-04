@@ -8,7 +8,7 @@ INPUT_FILES = [
 	'cnf_input_1.txt',
 	'cnf_input_2.txt'
 ]
-INPUT = open(INPUT_FILES[1], 'r').read().split('\n')
+INPUT = open(INPUT_FILES[0], 'r').read().split('\n')
 EPS = '_'
 
 def _printRules(rules):
@@ -173,6 +173,8 @@ def normalize(rules):
 	terminals = string.ascii_lowercase
 	lettersCounter = len(string.ascii_uppercase) - 1
 
+
+	# Normalize wave #1: Change productions that have more than 2 symbols
 	callStack = 1
 	while callStack:
 		for key in list(localRules):
@@ -191,9 +193,10 @@ def normalize(rules):
 	
 		callStack -= 1
 
+	# Normalize wave #2: Change productions that have more than one noneterminal symbols with terminals
 	for key in list(localRules):
 		for i, el in enumerate(localRules[key]):
-			if len(el) == 2 and _containsTerminal(el) and _containsNonterminal(el, localRules):
+			if len(el) == 2 and _containsTerminal(el):
 				if el in cache:
 					localRules[key][i] = cache[el]
 				else:
