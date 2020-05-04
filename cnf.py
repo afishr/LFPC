@@ -1,4 +1,5 @@
 import copy
+import string
 
 # TERMINAL = ['S', 'A', 'B', 'C', 'E']
 # NONTERMINAL = ['a', 'd']
@@ -40,6 +41,18 @@ def _removeRenaming(key, initialValue, rules):
 	rules[key] = rules[key] + rules[initialValue]
 
 	return rules	
+
+def _containsTerminal(str):
+	for letter in str:
+		if letter in string.ascii_lowercase:
+			return True
+	return False
+
+def _containsNonterminal(str, rules):
+	for letter in str:
+		if letter in rules:
+			return True
+	return False
 
 def readRules(inputArr, separator='->'):
 	res = {}
@@ -118,8 +131,8 @@ def removeNonproductives(rules):
 			if ( len(el) == 1 ) and (el not in localRules):
 				productives.add(key)
 
-	counter = 1
-	while counter:
+	callStack = 1
+	while callStack:
 		for key in localRules:
 			if key in productives:
 				continue
@@ -128,9 +141,9 @@ def removeNonproductives(rules):
 				for letter in el:
 					if (letter in productives):
 						productives.add(key)
-						counter += 1
+						callStack += 1
 		
-		counter -= 1
+		callStack -= 1
 
 	for key in list(localRules):
 		if key not in productives:
@@ -143,14 +156,60 @@ def removeNonproductives(rules):
 
 	return localRules
 	
+def normalize(rules):
+	localRules = copy.deepcopy(rules)
+
+	cache = {}
+	letters = string.ascii_uppercase
+	terminals = string.ascii_lowercase
+	lettersCounter = len(letters) - 1
+
+	#FIXME: When new letter nonterminal symbol need to check if this letter already exists in rules
+
+	callStack = 1
+	while callStack:
+		for key in list(localRules):
+			for i, el in enumerate(localRules[key]):
+				if len(el) > 2:
+					if el in cache:
+						localRules[key][i] = cache[el]
+					else:
+						cache[el] = letters[lettersCounter] + el[len(el)-1]
+
+						localRules[ letters[lettersCounter] ] = [el[:len(el)-1]]
+						localRules[key][i] = cache[el]
+
+						lettersCounter -= 1
+						callStack += 1
+	
+		callStack -= 1
+
+	for key in list(localRules):
+		for i, el in enumerate(localRules[key]):
+			if len(el) == 2 and _containsTerminal(el) and _containsNonterminal(el, localRules):
+				if el in cache:
+					localRules[key][i] = cache[el]
+				else:
+					for letter in el:
+						if letter in terminals:
+							if letter in cache:
+								localRules[key][i] = localRules[key][i].replace(letter, cache[letter])
+							else:
+								cache[letter] = letters[lettersCounter]
+								localRules[ cache[letter] ] = [letter]
+								localRules[key][i] = localRules[key][i].replace(letter, cache[letter])
+								lettersCounter -= 1
+					cache[el] = localRules[key][i]
+
+	return localRules					
+
 
 rules = readRules(INPUT)
-
-# _printRules(rules)
+_printRules(rules)
 
 rules = removeEpsilon(rules)
 rules = removeRenamings(rules)
 rules = removeInaccessibles(rules)
 rules = removeNonproductives(rules)
+rules = normalize(rules)
 _printRules(rules)
-
