@@ -8,6 +8,32 @@ INPUT_FILES = [
 INPUT = open(INPUT_FILES[0], 'r').read().split('\n')
 EPS = '_'
 
+def _powerset(seq):
+	"""
+	Returns all the subsets of this set. This is a generator.
+	"""
+
+	if len(seq) <= 1:
+		yield seq
+		yield []
+	else:
+		for item in _powerset(seq[1:]):
+			yield [seq[0]]+item
+			yield item
+
+def _replace(str, subStr, mask):
+	result = []
+	for m in mask:
+		modified = str
+		pos = 1
+		for i in m:
+			for _ in range(i):
+				pos = modified.find(subStr, pos-i)
+			
+			modified = modified[:pos] + modified[pos+1:]
+		result.append(modified)
+	return result
+
 def _printRules(rules):
 	for key in rules:
 		print(key, '->', rules[key])
@@ -84,21 +110,20 @@ def removeEpsilon(rules):
 			del localRules[epsKey]
 
 		for key in localRules:
-			if key == epsKey:
-				continue
-			
 			for i, el in enumerate(localRules[key]):
 				if epsKey in el:
-					woEps = el.replace(epsKey, '')
-
 					if epsKey in localRules:
-						if woEps:
-							localRules[key].append(woEps)
+						count = el.count(epsKey)
+						arr = [i for i in range(1, count + 1)]
+						subSets = [x for x in _powerset(arr)]
+						toAdd = _replace(el, epsKey, subSets)[:-1]
+						toAdd.reverse()
+						localRules[key] = ((localRules[key] + toAdd))
 					else:
 						if len(localRules[key][i]) == 1:
 							localRules[key].remove(epsKey)
 						else:
-							localRules[key][i] = woEps
+							localRules[key][i] = el.replace(epsKey, '')
 			
 		haveEpsilon, epsKey = _haveEpsilon(localRules)
 	return localRules
@@ -210,13 +235,26 @@ def normalize(rules):
 
 	return localRules					
 
-
 rules = readRules(INPUT)
+# print('INITIAL')
 _printRules(rules)
 
 rules = removeEpsilon(rules)
+# print('REMOVE EPSILON')
+# _printRules(rules)
+
 rules = removeRenamings(rules)
+# print('REMOVE RENAMINGS')
+# _printRules(rules)
+
 rules = removeInaccessibles(rules)
+# print('REMOVE INACCESSIBLES')
+# _printRules(rules)
+
 rules = removeNonproductives(rules)
+# print('REMOVE NONPRODUCTIVE')
+# _printRules(rules)
+
 rules = normalize(rules)
+# print('NORMALIZE')
 _printRules(rules)
