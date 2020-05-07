@@ -6,7 +6,33 @@ INPUT_FILES = [
 	'cnf_input_2.txt'
 ]
 INPUT = open(INPUT_FILES[0], 'r').read().split('\n')
-EPS = '_'
+EPS = 'ε'
+
+def _powerset(seq):
+	"""
+	Returns all the subsets of this set. This is a generator.
+	"""
+
+	if len(seq) <= 1:
+		yield seq
+		yield []
+	else:
+		for item in _powerset(seq[1:]):
+			yield [seq[0]]+item
+			yield item
+
+def _replace(str, subStr, mask):
+	result = []
+	for m in mask:
+		modified = str
+		pos = 1
+		for i in m:
+			for _ in range(i):
+				pos = modified.find(subStr, pos-i)
+			
+			modified = modified[:pos] + modified[pos+1:]
+		result.append(modified)
+	return result
 
 def _printRules(rules):
 	for key in rules:
@@ -84,21 +110,28 @@ def removeEpsilon(rules):
 			del localRules[epsKey]
 
 		for key in localRules:
-			if key == epsKey:
-				continue
-			
 			for i, el in enumerate(localRules[key]):
 				if epsKey in el:
-					woEps = el.replace(epsKey, '')
-
 					if epsKey in localRules:
-						if woEps:
-							localRules[key].append(woEps)
+						# Count how many times the epsKey is found in production
+						count = el.count(epsKey)
+						# Generate list with elements from 1 to previously counted value
+						arr = [i for i in range(1, count + 1)]
+						# Generate all subsets of previous list. This subsets mean the mask by which epsKey will be excluded. 
+						# E.g., mask [1, 2] means that 1st and 2nd occurences of epsKey in production will be excluded.
+						subSets = [x for x in _powerset(arr)]
+						# _replace() get as one of the parameters a list of such masks and returns a list of productions that will be appended to existings
+						# Here I make a slice of list w/o last element, because last element is always a prodcution that contains all epsKey,
+						# but such production already is present, in fact this is the original one that we pass as parameter to _replace()
+						toAdd = _replace(el, epsKey, subSets)[:-1]
+						# Reverse the list just for just for aesthetics
+						toAdd.reverse()
+						localRules[key] = localRules[key] + toAdd
 					else:
 						if len(localRules[key][i]) == 1:
 							localRules[key].remove(epsKey)
 						else:
-							localRules[key][i] = woEps
+							localRules[key][i] = el.replace(epsKey, '')
 			
 		haveEpsilon, epsKey = _haveEpsilon(localRules)
 	return localRules
@@ -210,13 +243,26 @@ def normalize(rules):
 
 	return localRules					
 
-
 rules = readRules(INPUT)
+# print('INITIAL')
 _printRules(rules)
 
 rules = removeEpsilon(rules)
+# print('REMOVE EPSILON')
+# _printRules(rules)
+
 rules = removeRenamings(rules)
+# print('REMOVE RENAMINGS')
+# _printRules(rules)
+
 rules = removeInaccessibles(rules)
+# print('REMOVE INACCESSIBLES')
+# _printRules(rules)
+
 rules = removeNonproductives(rules)
+# print('REMOVE NONPRODUCTIVE')
+# _printRules(rules)
+
 rules = normalize(rules)
+# print('NORMALIZE')
 _printRules(rules)
