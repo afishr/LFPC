@@ -113,12 +113,20 @@ def removeEpsilon(rules):
 			for i, el in enumerate(localRules[key]):
 				if epsKey in el:
 					if epsKey in localRules:
+						# Count how many times the epsKey is found in production
 						count = el.count(epsKey)
+						# Generate list with elements from 1 to previously counted value
 						arr = [i for i in range(1, count + 1)]
+						# Generate all subsets of previous list. This subsets mean the mask by which epsKey will be excluded. 
+						# E.g., mask [1, 2] means that 1st and 2nd occurences of epsKey in production will be excluded.
 						subSets = [x for x in _powerset(arr)]
+						# _replace() get as one of the parameters a list of such masks and returns a list of productions that will be appended to existings
+						# Here I make a slice of list w/o last element, because last element is always a prodcution that contains all epsKey,
+						# but such production already is present, in fact this is the original one that we pass as parameter to _replace()
 						toAdd = _replace(el, epsKey, subSets)[:-1]
+						# Reverse the list just for just for aesthetics
 						toAdd.reverse()
-						localRules[key] = ((localRules[key] + toAdd))
+						localRules[key] = localRules[key] + toAdd
 					else:
 						if len(localRules[key][i]) == 1:
 							localRules[key].remove(epsKey)
