@@ -6,7 +6,7 @@ INPUT_FILES = [
 	'cnf_input_2.txt'
 ]
 INPUT = open(INPUT_FILES[0], 'r').read().split('\n')
-EPS = '_'
+EPS = 'ε'
 
 def _powerset(seq):
 	"""

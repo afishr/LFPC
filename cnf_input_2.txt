@@ -6,6 +6,6 @@ A->bCaCa
 B->A
 B->bS
 B->bCAa
-C->_
+C->ε
 C->AB
 D->AB

@@ -6,5 +6,5 @@ A->aAdAB
 B->aC
 B->aS
 B->AC
-C->_
+C->ε
 E->AS
