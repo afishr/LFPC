@@ -116,7 +116,9 @@ def removeEpsilon(rules):
 						# Count how many times the epsKey is found in production
 						count = el.count(epsKey)
 						# Generate list with elements from 1 to previously counted value
-						arr = [i for i in range(1, count + 1)]
+						#FIXME: Should generete here array with indexes of occurences
+						# instead of dummy array from 1 to count of occurences
+						arr = [i for i in range(1, count + 1)] 
 						# Generate all subsets of previous list. This subsets mean the mask by which epsKey will be excluded. 
 						# E.g., mask [1, 2] means that 1st and 2nd occurences of epsKey in production will be excluded.
 						subSets = [x for x in _powerset(arr)]
@@ -179,6 +181,9 @@ def removeNonproductives(rules):
 
 			for el in localRules[key]:
 				for letter in el:
+					# FIXME: Should check if all nonterminals in production are productione 
+					# in other way, if first nonterm. is productive and others not the key
+					# anyway gets in productives set()
 					if (letter in productives):
 						productives.add(key)
 						callStack += 1
